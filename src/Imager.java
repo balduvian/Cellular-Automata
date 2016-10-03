@@ -9,7 +9,7 @@ public class Imager {
 	public Imager() throws IOException{
 		window = new Window();
 		long olt=0;
-		while(true){
+		while(true){//jo
 			window.canvas.repaint();
 			if(window.run){
 				Date t = new Date();

@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -32,12 +33,12 @@ public class Window extends JFrame{
 	JButton c;
 	int[][] block = new int[256][256];
 	double size = 2;
-	int speed =10; //for the IMAGER timer
+	int speed =0; //for the IMAGER timer
 	Color[] colors = {Color.WHITE,Color.RED,Color.GREEN,Color.BLUE,Color.YELLOW,Color.MAGENTA};
 	int[][] dom={{},{5,3},{1,4},{2,5},{3,1},{4,2}};
 	int cl=1;
 	int permitted = 2;
-	double variation = 0.1; //BETWEEN 0 AND 1
+	double variation = 0; //BETWEEN 0 AND 1
 	
 	public int[][] rPS(int[][] a){
 		int[][] temp = new int[a.length][a[0].length];
@@ -187,6 +188,12 @@ public class Window extends JFrame{
 				g.setColor(colors[i]);
 				g.fill3DRect((int)(-48+getWidth()/2-block[0].length*(size/2)), (int)((i*48)+getHeight()/2-block.length*(size/2)), 32, 32,cl==i);
 			}
+			g.setColor(Color.LIGHT_GRAY);
+			g.fillRect((int)((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), (int)(0+getHeight()/2-block.length*(size/2)), 32, 16);
+			g.fillRect((int)((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), (int)(16+getHeight()/2-block.length*(size/2)), 32, 16);
+			g.setColor(Color.BLACK);
+			g.setFont(new Font(Font.SANS_SERIF, 0, 32));
+			g.drawString("+", (int)((block[0].length*size)+24+getWidth()/2-block[0].length*(size/2)), (int)(16+getHeight()/2-block.length*(size/2)));
 		}
 	}
 	
@@ -254,12 +261,13 @@ public class Window extends JFrame{
 	
 	public void drawin(MouseEvent e,int m){ //DRAWING                   DRAWING
 			try{
+				int s = 3;
 				double yy= (((double)block.length*((double)size/2)/(double)size)-((double)getHeight()/2/(double)size)+((double)e.getY()/(double)size));
 				double xx= (((double)block[0].length*((double)size/2)/(double)size)-((double)getWidth()/2/(double)size)+((double)e.getX()/(double)size));
 				int y= (int)(yy);
 				int x= (int)(xx);
-				for(int dy=-1;dy<=1;dy++){
-					for(int dx=-1;dx<=1;dx++){
+				for(int dy=(int)(Math.floor(s/2)*-1);dy<=(int)(Math.floor(s/2));dy++){
+					for(int dx=(int)(Math.floor(s/2)*-1);dx<=(int)(Math.floor(s/2));dx++){
 						block[y+dy][x+dx]=m;
 					}
 				}
