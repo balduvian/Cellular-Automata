@@ -22,7 +22,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
+//WHEN GITHUB DOSN"T WORSZ
 public class Window extends JFrame{
 	
 	Canvas canvas;

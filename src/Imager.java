@@ -1,6 +1,6 @@
 import java.io.IOException;
 import java.util.Date;
-
+//lolol
 public class Imager {
 	
 	public Window window;
