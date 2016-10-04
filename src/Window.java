@@ -31,19 +31,20 @@ public class Window extends JFrame{
 	JButton r;
 	JButton n;
 	JButton c;
-	int[][] block = new int[256][256];
-	int size = 2;
-	Color[] colors = {Color.WHITE,Color.RED,Color.GREEN,Color.BLUE,Color.YELLOW,Color.MAGENTA};
+	JButton p;
+	int[][] block = new int[48][48];
+	int size = 10;
+	Color[] colors = {Color.WHITE,Color.RED,Color.ORANGE,Color.YELLOW,Color.GREEN,Color.BLUE};
 	int[][] dom={{},{5,3},{1,4},{2,5},{3,1},{4,2}};
 	int cl=1;
 	//int permitted = 2;
 	//int speed =15; //for the IMAGER timer
 	//double variation = 0; //BETWEEN 0 AND 1
-	String[] names = {"Permitted","Varitaion","Speed"};
-	double[] vars = {2,0,10};
-	double[] inc = {1,0.1,5};
-	int offx;
-	int offy;
+	String[] names = {"Permitted","Varitaion","Brush","Speed"};
+	double[] vars = {2, 0  , 1, 50};
+	double[] inc =  {1, 0.1, 2, 10};
+	//int offx;
+	//int offy;
 	
 	public int[][] rPS(int[][] a){
 		int[][] temp = new int[a.length][a[0].length];
@@ -64,9 +65,11 @@ public class Window extends JFrame{
 						}
 						else if(a[y][x]==i){
 							for(int u=0;u<dom[a[y][x]].length;u++){
+								try{
 								if(getCNeighbors(block,y,x)[dom[a[y][x]][u]]>vars[0]){
 									temp[y][x] = dom[a[y][x]][u];
 								}
+								}catch(Exception e){}
 							}
 						}
 					}
@@ -99,26 +102,30 @@ public class Window extends JFrame{
 		int nn =0;//Final return value
 		for(int y=-1;y<=1;y++){
 			for(int x=-1;x<=1;x++){
-				try{
-					n[a[py+y][px+x]]++; //finds the color of the tile that it's looking at and adds it to (list n) in it's index
+				try{ //finds the color of the tile that it's looking at and adds it to (list n) in it's index
+					int dy, dx;
+					
+					if(py+y<0){ //FINDING NEGATIVE ARRAY ACCESSES
+						dy = a.length-1;
+					}else if(py+y==a.length){
+						dy = 0;
+					}else{
+						dy = py+y;
+					}
+					
+					if(px+x<0){
+						dx = a[0].length-1;
+					}else if(px+x==a.length){
+						dx = 0;
+					}else{
+						dx = px+x;
+					}
+					
+					n[a[dy][dx]]++;
 				}catch(Exception e){}
 			}
 		}
-		n[a[py][px]]--; //makes sure it removes itself from neighbors list
-		/*int best=0;
-		for(int x=0;x<n.length;x++){ //goes through and finds best color in list
-			if(a[py][px]==0){ //So white doesn't automatically go away
-				if(n[x]>best){
-					nn = x;
-					best = n[x];
-				}
-			}else{
-				if(n[x]>best && x!=a[py][px]){ //makes sure it can't return itself
-					nn = x;
-					best = n[x];
-				}
-			}
-		}*/
+		n[a[py][px]]--;
 		return n;
 	}
 	
@@ -156,7 +163,24 @@ public class Window extends JFrame{
 		for(int y=-1;y<=1;y++){
 			for(int x=-1;x<=1;x++){
 				try{
-					if(a[py+y][px+x]==1){
+					int dy,dx;
+					if(py+y<0){ //FINDING NEGATIVE ARRAY ACCESSES
+						dy = a.length-1;
+					}else if(py+y==a.length){
+						dy = 0;
+					}else{
+						dy = py+y;
+					}
+					
+					if(px+x<0){
+						dx = a[0].length-1;
+					}else if(px+x==a.length){
+						dx = 0;
+					}else{
+						dx = px+x;
+					}
+					
+					if(a[dy][dx]==1){
 						n++;
 					}
 				}catch(Exception e){}
@@ -174,8 +198,8 @@ public class Window extends JFrame{
 			//t.setText(Boolean.toString(c));
 			super.paintComponent(g);
 			setBackground(Color.GRAY);
-			g.setColor(Color.WHITE);
-			g.fillRect((getWidth()/2-(block[0].length*(size/2))), (getHeight()/2-(block.length*(size/2))), (block[0].length*size), (block.length*size));
+			g.setColor(Color.WHITE); //WHITE BACKGROUND V V V V
+			g.fill3DRect((int)(getWidth()/2-(block[0].length*((double)size/2))), (getHeight()/2-(block.length*(size/2))), (block[0].length*size), (block.length*size),true);
 			for(int y=0;y<block.length;y++){
 				for(int x=0;x<block[y].length;x++){
 					if(block[y][x]>0){
@@ -194,9 +218,8 @@ public class Window extends JFrame{
 			g.setFont(new Font(Font.SANS_SERIF, 0, 20));
 			for(int i=0;i<vars.length;i++){
 				g.setColor(Color.WHITE);
-				g.fillRect(((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), ((i*48)+getHeight()/2-block.length*(size/2)), 32, 16);
-				g.setColor(Color.LIGHT_GRAY);
-				g.fillRect(((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), ((i*48+16)+getHeight()/2-block.length*(size/2)), 32, 16);
+				g.fill3DRect(((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), ((i*48)+getHeight()/2-block.length*(size/2)), 32, 16,true);
+				g.fill3DRect(((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), ((i*48+16)+getHeight()/2-block.length*(size/2)), 32, 16,false);
 				g.setColor(Color.BLACK);
 				g.drawString("^", ((block[0].length*size)+28+getWidth()/2-block[0].length*(size/2)), ((i*48+16)+getHeight()/2-block.length*(size/2)));
 				g.drawString("v", ((block[0].length*size)+28+getWidth()/2-block[0].length*(size/2)), ((i*48+16+14)+getHeight()/2-block.length*(size/2)));
@@ -215,6 +238,8 @@ public class Window extends JFrame{
 		r = new JButton("Start");
 		n = new JButton("Next");
 		c = new JButton("Clear");
+		p = new JButton("Populate");
+		p.addActionListener(new SP());
 		r.addActionListener(new SS());
 		n.addActionListener(new SK());
 		c.addActionListener(new SC());
@@ -223,6 +248,7 @@ public class Window extends JFrame{
 		bc.add(r);
 		bc.add(n);
 		bc.add(c);
+		bc.add(p);
 		//bc.add(t);
 		Container cp = getContentPane();
 		cp.setLayout(new BorderLayout());
@@ -230,6 +256,16 @@ public class Window extends JFrame{
 	    cp.add(bc, BorderLayout.SOUTH);
 	    //setResizable(false);
 		setVisible(true);
+	}
+	
+	public class SP implements ActionListener{
+		public void actionPerformed(ActionEvent arg0){
+			for(int y=0;y<block.length;y++){
+				for(int x=0;x<block[y].length;x++){
+					block[y][x]=(int)Math.round(Math.random());
+				}
+			}
+		}
 	}
 	
 	public class SS implements ActionListener{
@@ -259,9 +295,7 @@ public class Window extends JFrame{
 			r.setText("Start");
 			for(int y=0;y<block.length;y++){
 				for(int x=0;x<block[y].length;x++){
-					try{
 					block[y][x]=0;
-					}catch(Exception e){};
 				}
 			}
 		}
@@ -269,9 +303,9 @@ public class Window extends JFrame{
 	
 	public void drawin(MouseEvent e,int m){ //DRAWING                   DRAWING
 			try{
-				int s = 3;
-				int x = (int)( (e.getX())/size - (canvas.getWidth()/2)/size + (block[0].length*(size/2))/size );
-				int y = (int)( (e.getY())/size - (canvas.getHeight()/2)/size + (block.length*(size/2))/size );
+				int s = (int)vars[2];
+				int x = (int)( ((double)e.getX())/size - ((double)canvas.getWidth()/2)/size + ((double)block[0].length*(size/2))/size );
+				int y = (int)( ((double)e.getY())/size - ((double)canvas.getHeight()/2)/size + ((double)block.length*(size/2))/size );
 				for(int dy=(int)(Math.floor(s/2)*-1);dy<=(int)(Math.floor(s/2));dy++){
 					for(int dx=(int)(Math.floor(s/2)*-1);dx<=(int)(Math.floor(s/2));dx++){
 						block[y+dy][x+dx]=m;
@@ -305,8 +339,8 @@ public class Window extends JFrame{
 				}
 			}
 			for(int i=0;i<vars.length;i++){
-				Rectangle r = new Rectangle(((block[0].length*size)+8+getWidth()/2-block[0].length*(size/2)), ((i*48-32)+getHeight()/2-block.length*(size/2)), 32, 16);
-				Rectangle r2 = new Rectangle(((block[0].length*size)+8+getWidth()/2-block[0].length*(size/2)), ((i*48-16)+getHeight()/2-block.length*(size/2)), 32, 16);
+				Rectangle r = new Rectangle(((block[0].length*size)+16+canvas.getWidth()/2-block[0].length*(size/2)), ((i*48)+canvas.getHeight()/2-block.length*(size/2)), 32, 16);
+				Rectangle r2 = new Rectangle(((block[0].length*size)+16+canvas.getWidth()/2-block[0].length*(size/2)), ((i*48+16)+canvas.getHeight()/2-block.length*(size/2)), 32, 16);
 				if(m.intersects(r)){
 					vars[i]+=inc[i];
 				}

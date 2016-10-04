@@ -9,15 +9,18 @@ public class Imager {
 	public Imager() throws IOException{
 		window = new Window();
 		long olt=0;
-		while(true){//jo
+		while(true){
 			window.canvas.repaint();
 			if(window.run){
 				Date t = new Date();
-				if(window.vars[2] ==0 || (t.getTime()-goal)%window.vars[2] == 0 && olt != t.getTime()){
+				try{
+				Thread.sleep((long)window.vars[3]);
+				}catch(Exception e){}
+				//if(window.speed ==0 || (t.getTime()-goal)%window.speed == 0 && olt != t.getTime()){
 					olt = t.getTime();
-					window.block = window.rPS(window.block);
+					window.block = window.generation(window.block);
 				
-				}
+				//}
 			}
 		}
 	}
