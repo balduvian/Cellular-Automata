@@ -306,6 +306,7 @@ public class Window extends JFrame{
 					block[y][x]=0;
 				}
 			}
+			ants.clear();
 		}
 	}
 	
