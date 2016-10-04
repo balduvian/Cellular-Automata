@@ -32,8 +32,8 @@ public class Window extends JFrame{
 	JButton n;
 	JButton c;
 	int[][] block = new int[256][256];
-	double size = 2;
-	int speed =0; //for the IMAGER timer
+	int size = 2;
+	int speed =15; //for the IMAGER timer
 	Color[] colors = {Color.WHITE,Color.RED,Color.GREEN,Color.BLUE,Color.YELLOW,Color.MAGENTA};
 	int[][] dom={{},{5,3},{1,4},{2,5},{3,1},{4,2}};
 	int cl=1;
@@ -48,6 +48,9 @@ public class Window extends JFrame{
 					for(int i=1;i<=dom.length;i++){
 						if(a[y][x]==0){
 							for(int u=1;u<colors.length;u++){
+								if(getCNeighbors(block,y,x)[0]==8){
+									break;
+								}
 								if(getCNeighbors(block,y,x)[u]>permitted){
 									temp[y][x] = u;
 									break;
@@ -167,33 +170,29 @@ public class Window extends JFrame{
 			super.paintComponent(g);
 			setBackground(Color.GRAY);
 			g.setColor(Color.WHITE);
-			g.fillRect((int)((double)getWidth()/2-((double)block[0].length*(size/2))), (int)((double)getHeight()/2-((double)block.length*(size/2))), (int)(block[0].length*size), (int)(block.length*size));
+			g.fillRect((getWidth()/2-(block[0].length*(size/2))), (getHeight()/2-(block.length*(size/2))), (block[0].length*size), (block.length*size));
 			for(int y=0;y<block.length;y++){
 				for(int x=0;x<block[y].length;x++){
 					if(block[y][x]>0){
 					g.setColor(colors[block[y][x]]);
-					int offy = (int)((double)getHeight()/2-((double)block.length*(size/2)));
-					int offx = (int)((double)getWidth()/2-((double)block[0].length*(size/2)));
-					int py = (int)((double)y*size+offy);
-					int px = (int)((double)x*size+offx);
-					g.fillRect(px, py, (int)size, (int)size);
-					//g.setColor(Color.RED);
-					//g.drawString(String.valueOf(getNeighbors(block,y,x)),px+10,py+10);
-					//System.out.println(((double)x*size+((double)getWidth()/2-((double)block.length*(size/2)))));
-					//g.fillRect(x*size, y*size, size, size);
+					int py = (y*size+getHeight()/2-(block.length*(size/2)));
+					int px = (x*size+getWidth()/2-(block[0].length*(size/2)));
+					g.fillRect(px, py, size, size);
 					}
 				}
 			}
 			for(int i=0;i<colors.length;i++){ //DRAW COLOR SELECTORS
 				g.setColor(colors[i]);
-				g.fill3DRect((int)(-48+getWidth()/2-block[0].length*(size/2)), (int)((i*48)+getHeight()/2-block.length*(size/2)), 32, 32,cl==i);
+				g.fill3DRect((int)(-48+getWidth()/2-block[0].length*(size/2)), ((i*48)+getHeight()/2-block.length*(size/2)), 32, 32,cl==i);
 			}
 			g.setColor(Color.LIGHT_GRAY);
-			g.fillRect((int)((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), (int)(0+getHeight()/2-block.length*(size/2)), 32, 16);
-			g.fillRect((int)((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), (int)(16+getHeight()/2-block.length*(size/2)), 32, 16);
+			g.fillRect((int)((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), (0+getHeight()/2-block.length*(size/2)), 32, 16);
+			g.fillRect((int)((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), (20+getHeight()/2-block.length*(size/2)), 32, 16);
 			g.setColor(Color.BLACK);
-			g.setFont(new Font(Font.SANS_SERIF, 0, 32));
-			g.drawString("+", (int)((block[0].length*size)+24+getWidth()/2-block[0].length*(size/2)), (int)(16+getHeight()/2-block.length*(size/2)));
+			g.setFont(new Font(Font.SANS_SERIF, 0, 20));
+			g.drawString("^", ((block[0].length*size)+24+getWidth()/2-block[0].length*(size/2)), (14+getHeight()/2-block.length*(size/2)));
+			g.drawString("v", ((block[0].length*size)+24+getWidth()/2-block[0].length*(size/2)), (34+getHeight()/2-block.length*(size/2)));
+			g.drawString("Permitted: "+Integer.toString(permitted), ((block[0].length*size)+52+getWidth()/2-block[0].length*(size/2)), (20+getHeight()/2-block.length*(size/2)));
 		}
 	}
 	
@@ -262,10 +261,8 @@ public class Window extends JFrame{
 	public void drawin(MouseEvent e,int m){ //DRAWING                   DRAWING
 			try{
 				int s = 3;
-				double yy= (((double)block.length*((double)size/2)/(double)size)-((double)getHeight()/2/(double)size)+((double)e.getY()/(double)size));
-				double xx= (((double)block[0].length*((double)size/2)/(double)size)-((double)getWidth()/2/(double)size)+((double)e.getX()/(double)size));
-				int y= (int)(yy);
-				int x= (int)(xx);
+				int x = (int)( (e.getX())/size - (canvas.getWidth()/2)/size + (block[0].length*(size/2))/size );
+				int y = (int)( (e.getY())/size - (canvas.getHeight()/2)/size + (block.length*(size/2))/size );
 				for(int dy=(int)(Math.floor(s/2)*-1);dy<=(int)(Math.floor(s/2));dy++){
 					for(int dx=(int)(Math.floor(s/2)*-1);dx<=(int)(Math.floor(s/2));dx++){
 						block[y+dy][x+dx]=m;
