@@ -18,7 +18,7 @@ public class Imager {
 				}catch(Exception e){}
 				//if(window.speed ==0 || (t.getTime()-goal)%window.speed == 0 && olt != t.getTime()){
 					olt = t.getTime();
-					window.block = window.generation(window.block);
+					window.block = window.ant(window.block);
 				
 				//}
 			}

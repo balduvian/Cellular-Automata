@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -10,8 +11,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.LinkedList;
+
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -24,22 +28,78 @@ public class Window extends JFrame{
 	JButton n;
 	JButton c;
 	JButton p;
-	int[][] block = new int[64][64];
-	int size = 8;
-	Color[] colors = {Color.WHITE,Color.RED,Color.ORANGE,Color.YELLOW,Color.GREEN,Color.BLUE};
-	Color[] acolors = {Color.RED,Color.BLUE,Color.GREEN};
+	int[][] block = new int[256][256];
+	int size = 2;
+	Color[] colors = {Color.WHITE,new Color(100,0,100),new Color(0,100,0),new Color(200,0,50),new Color(100,200,150)};
+	Color[] acolors = {Color.RED};
 	int[][] dom={{},{5,3},{1,4},{2,5},{3,1},{4,2}};
-	int[][] dirs={{0,1,0,1,0,1},{0,1,0,0,0,1},{1,0,1,1,0,0}};
-	LinkedList<Integer[]> ants = new LinkedList<Integer[]>();
+	int[] dirs = new int[colors.length];
+	LinkedList<int[]> ants = new LinkedList<int[]>();
 	int cl=1;
 	//int permitted = 2;
-	//int speed =15; //for the IMAGER timer
+	//int speed =15; //f
 	//double variation = 0; //BETWEEN 0 AND 1
-	String[] names = {"Permitted","Variation","Brush","Speed"};
-	double[] vars = {2, 0  , 1, 50};
-	double[] inc =  {1, 0.1, 2, 10};
-	//int offx;
-	//int offy;
+	String[] names = {"P","V","B","T"};
+	double[] vars = {2, 0  , 1, 0};
+	double[] inc =  {1, 0.2, 2, 1};
+	int offx;
+	int offy;
+	
+	public int[][] ant(int[][] a){
+		for(int i=0;i<ants.size();i++){
+			//LRRRRRLLR
+			try{
+					if(dirs[a[ants.get(i)[1]][ants.get(i)[2]]]==1){
+						ants.get(i)[3]--;
+					}else{
+						ants.get(i)[3]++;
+					}
+				ants.get(i)[3] = Math.floorMod(ants.get(i)[3], 4);
+				
+				int[] pos = arrayAccess(a,ants.get(i)[1],ants.get(i)[2]);
+				a[pos[0]][pos[1]]++;
+				a[pos[0]][pos[1]] %= colors.length-1+1; //set the block the ant is on
+				
+				if      (ants.get(i)[3]==0){
+					ants.get(i)[1]--;
+					if(ants.get(i)[1]<0){
+						ants.get(i)[1] = a.length-1;
+					}
+				}else if(ants.get(i)[3]==1){
+					ants.get(i)[2]++;
+					if(ants.get(i)[2]==a[0].length){
+						ants.get(i)[2] = 0;
+					}
+				}else if(ants.get(i)[3]==2){
+					ants.get(i)[1]++;
+					if(ants.get(i)[1]==a.length){
+						ants.get(i)[1] = 0;
+					}
+				}else if(ants.get(i)[3]==3){
+					ants.get(i)[2]--;
+					if(ants.get(i)[2]<0){
+						ants.get(i)[2] = a[0].length-1;
+					}
+				}
+			}catch(Exception e){System.out.println("YOU");}
+		}
+		return a;
+	}
+	
+	public int[] arrayAccess(int[][] a,int y, int x){
+		int dy=y,dx=x;
+		if(y<0){ //FINDING NEGATIVE ARRAY ACCESSES
+			dy = a.length-1;
+		}else if(y==a.length){
+			dy = 0;
+		}
+		if(x<0){
+			dx = a[0].length-1;
+		}else if(x==a.length){
+			dx = 0;
+		}
+		return new int[]{dy,dx};
+	}
 	
 	public int[][] rPS(int[][] a){
 		int[][] temp = new int[a.length][a[0].length];
@@ -189,49 +249,66 @@ public class Window extends JFrame{
 	}
 	
 	public class Canvas extends JPanel{
+		BufferedImage arrow;
+		public Canvas(){
+			try{arrow = ImageIO.read(getClass().getResource("arrow.png"));} catch (IOException e) {}
+		}
+		
 		public void paintComponent(Graphics g){
-			//t.setText(Boolean.toString(c));
+			//offy = (int)(((double)canvas.getHeight()/2)-(block.length*((double)size/2)));
+			//offx = (int)(((double)canvas.getWidth()/2)-(block[0].length*((double)size/2)));
+			offy = 16;
+			offx = 64;
 			super.paintComponent(g);
 			setBackground(Color.GRAY);
 			g.setColor(Color.WHITE); //WHITE BACKGROUND V V V V
-			g.fill3DRect((int)(getWidth()/2-(block[0].length*((double)size/2))), (getHeight()/2-(block.length*(size/2))), (block[0].length*size), (block.length*size),true);
+			g.fill3DRect(offx, offy, (block[0].length*size), (block.length*size),true);
 			for(int y=0;y<block.length;y++){
 				for(int x=0;x<block[y].length;x++){
 					if(block[y][x]>0){
 					g.setColor(colors[block[y][x]]);
-					int py = (y*size+getHeight()/2-(block.length*(size/2)));
-					int px = (x*size+getWidth()/2-(block[0].length*(size/2)));
+					int py = (y*size+offy);
+					int px = (x*size+offx);
 					g.fillRect(px, py, size, size);
 					}
 				}
 			}
 			for(int i=0;i<ants.size();i++){
-				g.setColor(acolors[ants.get(i)[0]]);
-				g.fillRect(ants.get(i)[2]*size+getWidth()/2-(block[0].length*(size/2)),ants.get(i)[1]*size+getHeight()/2-(block.length*(size/2)),size-2,size-2);
+				//g.setColor(Color.BLACK);
+				//g.fillRect(ants.get(i)[2]*size+offx+1,ants.get(i)[1]*size+offy+1,size-2,size-2);
+				//g.setColor(acolors[ants.get(i)[0]]);
+				//g.fillRect(2+ants.get(i)[2]*size+offx,2+ants.get(i)[1]*size+offy,size-4,size-4);
+				g.setColor(Color.BLACK);
+				g.fillRect(ants.get(i)[2]*size+offx,ants.get(i)[1]*size+offy,size,size);
 			}
 			for(int i=0;i<colors.length;i++){ //DRAW COLOR SELECTORS
 				g.setColor(colors[i]);
-				g.fill3DRect((int)(-48+getWidth()/2-block[0].length*(size/2)), ((i*48)+getHeight()/2-block.length*(size/2)), 32, 32,cl==i);
+				g.fill3DRect(-48+offx, i*48+offy, 32, 32,cl==i);
+				if(dirs[i]==0){
+					g.drawImage(arrow,-48+offx,i*48+offy,this);
+				}else{
+					g.drawImage(arrow,-48+offx+32,i*48+offy,-32,32,this);
+				}
 			}
 			//DIVIDER LINE THO V V V
 			g.setColor(Color.BLACK);
-			g.fillRect((int)(-52+getWidth()/2-block[0].length*(size/2)), ((colors.length*48)-10+getHeight()/2-block.length*(size/2)), 40, 4);
+			g.fillRect(-52+offx, colors.length*48-10+offy, 40, 4);
 			
 			for(int i=0;i<acolors.length;i++){ //ANT SELECTORS
-				g.setColor(acolors[i]);
-				g.fill3DRect((int)(-48+getWidth()/2-block[0].length*(size/2)), ((colors.length*48)+(i*48)+getHeight()/2-block.length*(size/2)), 32, 32,cl==i+colors.length);
 				g.setColor(Color.BLACK);
-				g.fillRect((int)(-40+getWidth()/2-block[0].length*(size/2)), (8+(colors.length*48)+(i*48)+getHeight()/2-block.length*(size/2)), 16, 16);
+				g.fill3DRect(-48+offx, (colors.length*48)+(i*48)+offy, 32, 32,cl==i+colors.length);
+				g.setColor(acolors[i]);
+				g.fillRect(-40+offx, 8+(colors.length*48)+(i*48)+offy, 16, 16);
 			}
 			g.setFont(new Font(Font.SANS_SERIF, 0, 20));
 			for(int i=0;i<vars.length;i++){
 				g.setColor(Color.WHITE);
-				g.fill3DRect(((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), ((i*48)+getHeight()/2-block.length*(size/2)), 32, 16,true);
-				g.fill3DRect(((block[0].length*size)+16+getWidth()/2-block[0].length*(size/2)), ((i*48+16)+getHeight()/2-block.length*(size/2)), 32, 16,false);
+				g.fill3DRect((block[0].length*size)+16+offx, (i*48)+offy, 32, 16,true);
+				g.fill3DRect((block[0].length*size)+16+offx, (i*48+16)+offy, 32, 16,false);
 				g.setColor(Color.BLACK);
-				g.drawString("^", ((block[0].length*size)+28+getWidth()/2-block[0].length*(size/2)), ((i*48+16)+getHeight()/2-block.length*(size/2)));
-				g.drawString("v", ((block[0].length*size)+28+getWidth()/2-block[0].length*(size/2)), ((i*48+16+14)+getHeight()/2-block.length*(size/2)));
-				g.drawString(names[i]+": "+Double.toString(vars[i]), ((block[0].length*size)+52+getWidth()/2-block[0].length*(size/2)), ((i*48+22)+getHeight()/2-block.length*(size/2)));
+				g.drawString("^", (block[0].length*size)+28+offx, (i*48+16)+offy);
+				g.drawString("v", (block[0].length*size)+28+offx, (i*48+16+14)+offy);
+				g.drawString(names[i]+": "+Double.toString(Math.round(vars[i]*10)/10), (block[0].length*size)+52+offx, (i*48+22)+offy);
 			}
 		}
 	}
@@ -292,7 +369,7 @@ public class Window extends JFrame{
 	public class SK implements ActionListener{
 		public void actionPerformed(ActionEvent arg0) {
 			if(run==false){
-				rPS(block);
+				ant(block);
 			}
 		}
 	}
@@ -313,13 +390,16 @@ public class Window extends JFrame{
 	public void drawin(MouseEvent e,int m){ //DRAWING                   DRAWING
 			try{
 				int s = (int)vars[2];
-				int x = (int)( ((double)e.getX())/size - ((double)canvas.getWidth()/2)/size + ((double)block[0].length*(size/2))/size );
-				int y = (int)( ((double)e.getY())/size - ((double)canvas.getHeight()/2)/size + ((double)block.length*(size/2))/size );
+				//int x = (int)( ((double)e.getX())/size - ((double)canvas.getWidth()/2)/size + ((double)block[0].length*(size/2))/size );
+				//int y = (int)( ((double)e.getY())/size - ((double)canvas.getHeight()/2)/size + ((double)block.length*(size/2))/size );
+				int x = (int)((double)e.getX()/size - ((double)offx/size));
+				int y = (int)((double)e.getY()/size - ((double)offy/size));
 				for(int dy=(int)(Math.floor(s/2)*-1);dy<=(int)(Math.floor(s/2));dy++){
 					for(int dx=(int)(Math.floor(s/2)*-1);dx<=(int)(Math.floor(s/2));dx++){
 						if(m>=colors.length){
-							Integer[] temp = {m-colors.length,y+dy,x+dy};
-							ants.add(temp);
+							if(y+dy>=0 && x+dx>=0 && y+dy<block.length && x+dx<block[0].length){
+								ants.add(new int[]{m-colors.length,y+dy,x+dx,0});
+							}
 						}else{
 							block[y+dy][x+dx]=m;
 						}
@@ -347,14 +427,19 @@ public class Window extends JFrame{
 		public void mousePressed(MouseEvent e) {
 			Rectangle m = new Rectangle(e.getX(),e.getY(),1,1);
 			for(int i=0;i<colors.length;i++){ //LOOK FOR COLOR SELECTORS
-				Rectangle r = new Rectangle((-48+canvas.getWidth()/2-block[0].length*(size/2)), ((i*48)+canvas.getHeight()/2-block.length*(size/2)), 32, 32);
+				Rectangle r = new Rectangle(-48+offx, (i*48)+offy, 32, 32);
 				if(m.intersects(r)){
 					cl = i;
+					if(dirs[i] == 0){
+						dirs[i] = 1;
+					}else{
+						dirs[i] = 0;
+					}
 				}
 			}
 			for(int i=0;i<vars.length;i++){
-				Rectangle r = new Rectangle(((block[0].length*size)+16+canvas.getWidth()/2-block[0].length*(size/2)), ((i*48)+canvas.getHeight()/2-block.length*(size/2)), 32, 16);
-				Rectangle r2 = new Rectangle(((block[0].length*size)+16+canvas.getWidth()/2-block[0].length*(size/2)), ((i*48+16)+canvas.getHeight()/2-block.length*(size/2)), 32, 16);
+				Rectangle r = new Rectangle((block[0].length*size)+16+offx, (i*48)+offy, 32, 16);
+				Rectangle r2 = new Rectangle((block[0].length*size)+16+offx, (i*48+16)+offy, 32, 16);
 				if(m.intersects(r)){
 					vars[i]+=inc[i];
 				}
@@ -363,7 +448,7 @@ public class Window extends JFrame{
 				}
 			}
 			for(int i=0;i<acolors.length;i++){
-				Rectangle r = new Rectangle((int)(-48+canvas.getWidth()/2-block[0].length*(size/2)), ((colors.length*48)+(i*48)+canvas.getHeight()/2-block.length*(size/2)), 32, 32);
+				Rectangle r = new Rectangle(-48+offx, (colors.length*48)+(i*48)+offy, 32, 32);
 				if(m.intersects(r)){
 					cl = i+colors.length;
 					drawin(e,cl);
