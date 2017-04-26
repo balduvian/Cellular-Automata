@@ -28,10 +28,10 @@ public class Window extends JFrame{
 	JButton n;
 	JButton c;
 	JButton p;
-	int[][] block = new int[256][256];
-	int size = 2;
-	Color[] colors = {Color.WHITE,new Color(100,0,100),new Color(0,100,0),new Color(200,0,50),new Color(100,200,150)};
-	Color[] acolors = {Color.RED};
+	int[][] block = new int[48][64];
+	int size = 14;
+	Color[] colors = {Color.WHITE,new Color(100,0,100)};
+
 	int[][] dom={{},{5,3},{1,4},{2,5},{3,1},{4,2}};
 	int[] dirs = new int[colors.length];
 	LinkedList<int[]> ants = new LinkedList<int[]>();
@@ -40,8 +40,9 @@ public class Window extends JFrame{
 	//int speed =15; //f
 	//double variation = 0; //BETWEEN 0 AND 1
 	String[] names = {"P","V","B","T"};
-	double[] vars = {2, 0  , 1, 0};
-	double[] inc =  {1, 0.2, 2, 1};
+	double[] vars = {2, 0  , 1, 60};
+	double[] inc =  {1, 0.2, 2, 5};
+	boolean grid = true;
 	int offx;
 	int offy;
 	
@@ -154,7 +155,6 @@ public class Window extends JFrame{
 	
 	public int[] getCNeighbors(int[][] a, int py, int px){ //gets the color that most surrounds the tile at position in a list
 		int[] n = new int[colors.length];//one value for each color next to the start block (includes white)
-		int nn =0;//Final return value
 		for(int y=-1;y<=1;y++){
 			for(int x=-1;x<=1;x++){
 				try{ //finds the color of the tile that it's looking at and adds it to (list n) in it's index
@@ -249,9 +249,10 @@ public class Window extends JFrame{
 	}
 	
 	public class Canvas extends JPanel{
-		BufferedImage arrow;
+		private static final long serialVersionUID = -1344511314407377678L;
+
 		public Canvas(){
-			try{arrow = ImageIO.read(getClass().getResource("arrow.png"));} catch (IOException e) {}
+			
 		}
 		
 		public void paintComponent(Graphics g){
@@ -265,11 +266,11 @@ public class Window extends JFrame{
 			g.fill3DRect(offx, offy, (block[0].length*size), (block.length*size),true);
 			for(int y=0;y<block.length;y++){
 				for(int x=0;x<block[y].length;x++){
-					if(block[y][x]>0){
+					if(block[y][x]>0 || grid){
 					g.setColor(colors[block[y][x]]);
 					int py = (y*size+offy);
 					int px = (x*size+offx);
-					g.fillRect(px, py, size, size);
+					g.fill3DRect(px, py, size, size,grid);
 					}
 				}
 			}
@@ -284,22 +285,11 @@ public class Window extends JFrame{
 			for(int i=0;i<colors.length;i++){ //DRAW COLOR SELECTORS
 				g.setColor(colors[i]);
 				g.fill3DRect(-48+offx, i*48+offy, 32, 32,cl==i);
-				if(dirs[i]==0){
-					g.drawImage(arrow,-48+offx,i*48+offy,this);
-				}else{
-					g.drawImage(arrow,-48+offx+32,i*48+offy,-32,32,this);
-				}
 			}
 			//DIVIDER LINE THO V V V
 			g.setColor(Color.BLACK);
 			g.fillRect(-52+offx, colors.length*48-10+offy, 40, 4);
 			
-			for(int i=0;i<acolors.length;i++){ //ANT SELECTORS
-				g.setColor(Color.BLACK);
-				g.fill3DRect(-48+offx, (colors.length*48)+(i*48)+offy, 32, 32,cl==i+colors.length);
-				g.setColor(acolors[i]);
-				g.fillRect(-40+offx, 8+(colors.length*48)+(i*48)+offy, 16, 16);
-			}
 			g.setFont(new Font(Font.SANS_SERIF, 0, 20));
 			for(int i=0;i<vars.length;i++){
 				g.setColor(Color.WHITE);
@@ -316,7 +306,7 @@ public class Window extends JFrame{
 	public Window(){
 		setTitle("Rock Paper Scissors");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(890, 640);
+		setSize(1300, 800);
 		canvas = new Canvas();
 		canvas.addMouseListener(new MListen());
 		canvas.addMouseMotionListener(new MListen2());
@@ -445,13 +435,6 @@ public class Window extends JFrame{
 				}
 				if(m.intersects(r2)){
 					vars[i]-=inc[i];
-				}
-			}
-			for(int i=0;i<acolors.length;i++){
-				Rectangle r = new Rectangle(-48+offx, (colors.length*48)+(i*48)+offy, 32, 32);
-				if(m.intersects(r)){
-					cl = i+colors.length;
-					drawin(e,cl);
 				}
 			}
 			drawin(e,cl);
